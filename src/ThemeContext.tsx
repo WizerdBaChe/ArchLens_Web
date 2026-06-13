@@ -17,12 +17,12 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  theme: 'hacker',
+  theme: 'default',
   toggleTheme: () => {},
 })
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('hacker')
+  const [theme, setTheme] = useState<Theme>('default')
   const toggleTheme = () =>
     setTheme(prev => (prev === 'hacker' ? 'default' : 'hacker'))
 
