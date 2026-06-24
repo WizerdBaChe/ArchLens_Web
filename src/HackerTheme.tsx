@@ -16,6 +16,7 @@ import { useRef, useState, useEffect } from 'react'
 import type { TreeNodeData, InputSource } from './types'
 import { useTheme } from './ThemeContext'
 import { buildTreeEnvelopeJson } from './services/treeExport'
+import { sendTreeToDiff } from './services/handoff'
 
 // ─── 常數：inline style 物件避免 Tailwind arbitrary value 過多 ──────────
 const C = {
@@ -176,6 +177,13 @@ function HackerOutput({ asciiText, rootNodeName, rootNode }: HackerOutputProps) 
     triggerDownload(`${getSafeName()}_File_Structure.json`, buildTreeEnvelopeJson(rootNode))
   }
 
+  // 報告 handoff：把目前結構送到 ArchLens Diff 比較（反孤島）
+  const sendToDiff = () => {
+    if (!rootNode) return
+    sendTreeToDiff(rootNode)
+    setShowDropdown(false)
+  }
+
   const handleCopy = async () => {
     if (!asciiText) return
     await navigator.clipboard.writeText(asciiText)
@@ -232,6 +240,7 @@ function HackerOutput({ asciiText, rootNodeName, rootNode }: HackerOutputProps) 
                   { label: 'export .txt', fn: exportTxt },
                   { label: 'export .md', fn: exportMd },
                   ...(rootNode ? [{ label: 'export .json (tree)', fn: exportJson }] : []),
+                  ...(rootNode ? [{ label: '↗ send to Diff', fn: sendToDiff }] : []),
                 ].map(item => (
                   <button
                     key={item.label}

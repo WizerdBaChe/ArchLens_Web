@@ -8,6 +8,7 @@
 import { useState } from 'react'
 import type { TreeNodeData } from '../types'
 import { buildTreeEnvelopeJson } from '../services/treeExport'
+import { sendTreeToDiff } from '../services/handoff'
 
 interface TreeViewProps {
   asciiText: string
@@ -56,6 +57,13 @@ export const TreeView: React.FC<TreeViewProps> = ({ asciiText, rootNodeName, roo
   const exportAsJson = () => {
     if (!rootNode) return
     triggerDownload(getDynamicFilename('json'), buildTreeEnvelopeJson(rootNode))
+  }
+
+  // 報告 handoff：把目前結構送到 ArchLens Diff 比較（反孤島）
+  const handleSendToDiff = () => {
+    if (!rootNode) return
+    sendTreeToDiff(rootNode)
+    setShowDropdown(false)
   }
 
   const handleCopy = async () => {
@@ -117,6 +125,14 @@ export const TreeView: React.FC<TreeViewProps> = ({ asciiText, rootNodeName, roo
                     className="w-full text-left px-4 py-2.5 text-xs text-slate-300 hover:bg-slate-700 font-medium transition-colors border-t border-slate-700/50 cursor-pointer"
                   >
                     🔗 匯出 JSON tree（給 Diff 等）
+                  </button>
+                )}
+                {rootNode && (
+                  <button
+                    onClick={handleSendToDiff}
+                    className="w-full text-left px-4 py-2.5 text-xs text-indigo-300 hover:bg-slate-700 font-semibold transition-colors border-t border-slate-700/50 cursor-pointer"
+                  >
+                    ↗ 送到 Diff 比較
                   </button>
                 )}
               </div>

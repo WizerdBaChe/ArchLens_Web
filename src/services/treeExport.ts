@@ -33,9 +33,9 @@ export function flattenToTreeNodes(root: TreeNodeData): TreeNode[] {
   return nodes
 }
 
-/** 產生可下載的 `tree` 信封 JSON 字串（已縮排）。 */
-export function buildTreeEnvelopeJson(root: TreeNodeData): string {
-  const envelope: TreeEnvelope = wrapTree(
+/** 建出 `tree` 信封物件（供下載字串與 handoff 共用）。 */
+export function buildTreeEnvelope(root: TreeNodeData): TreeEnvelope {
+  return wrapTree(
     flattenToTreeNodes(root),
     {
       product: 'web',
@@ -44,5 +44,9 @@ export function buildTreeEnvelopeJson(root: TreeNodeData): string {
     },
     root.name,
   )
-  return JSON.stringify(envelope, null, 2)
+}
+
+/** 產生可下載的 `tree` 信封 JSON 字串（已縮排）。 */
+export function buildTreeEnvelopeJson(root: TreeNodeData): string {
+  return JSON.stringify(buildTreeEnvelope(root), null, 2)
 }
