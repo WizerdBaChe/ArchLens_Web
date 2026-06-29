@@ -9,6 +9,7 @@ import { useState } from 'react'
 import type { TreeNodeData } from '../types'
 import { buildTreeEnvelopeJson } from '../services/treeExport'
 import { sendTreeToDiff } from '../services/handoff'
+import { deriveOrientation, renderOrientationHeader } from '../services/orientation'
 import { useLocale } from '../i18n'
 
 interface TreeViewProps {
@@ -20,7 +21,11 @@ interface TreeViewProps {
 export const TreeView: React.FC<TreeViewProps> = ({ asciiText, rootNodeName, rootNode }) => {
   const [showDropdown, setShowDropdown] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [showOrientation, setShowOrientation] = useState(false)
   const { t } = useLocale()
+
+  const orientation = rootNode ? deriveOrientation(rootNode) : null
+  const orientationHeader = orientation ? renderOrientationHeader(orientation) : ''
 
   // DD-026：動態檔名生成器（過濾 OS 非法字元）
   const getDynamicFilename = (extension: string): string => {
@@ -43,7 +48,8 @@ export const TreeView: React.FC<TreeViewProps> = ({ asciiText, rootNodeName, roo
 
   const exportAsTxt = () => {
     if (!asciiText) return
-    triggerDownload(getDynamicFilename('txt'), asciiText)
+    const prefix = orientationHeader ? orientationHeader + '\n\n' : ''
+    triggerDownload(getDynamicFilename('txt'), prefix + asciiText)
   }
 
   const exportAsMd = () => {
@@ -51,7 +57,8 @@ export const TreeView: React.FC<TreeViewProps> = ({ asciiText, rootNodeName, roo
     const title = rootNodeName
       ? rootNodeName.replace(/[<>:"/\\|?*]+/g, '')
       : 'Project'
-    const markdownContent = `# ${title} Structure\n\n\`\`\`text\n${asciiText}\n\`\`\`\n`
+    const orientationBlock = orientationHeader ? orientationHeader + '\n\n' : ''
+    const markdownContent = `${orientationBlock}# ${title} Structure\n\n\`\`\`text\n${asciiText}\n\`\`\`\n`
     triggerDownload(getDynamicFilename('md'), markdownContent)
   }
 
@@ -70,7 +77,8 @@ export const TreeView: React.FC<TreeViewProps> = ({ asciiText, rootNodeName, roo
 
   const handleCopy = async () => {
     if (!asciiText) return
-    await navigator.clipboard.writeText(asciiText)
+    const prefix = orientationHeader ? orientationHeader + '\n\n' : ''
+    await navigator.clipboard.writeText(prefix + asciiText)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -100,6 +108,20 @@ export const TreeView: React.FC<TreeViewProps> = ({ asciiText, rootNodeName, roo
           >
             ASCII Preview
           </span>
+          {orientation && orientation.entryCandidates.length > 0 && (
+            <button
+              onClick={() => setShowOrientation((v) => !v)}
+              className="text-xs px-2 py-0.5 rounded-md border cursor-pointer transition-all"
+              style={{
+                background: showOrientation ? 'var(--al-accent)' : 'var(--al-surface-raised)',
+                border: '1px solid var(--al-border)',
+                color: showOrientation ? 'var(--al-accent-contrast)' : 'var(--al-text-secondary)',
+              }}
+              title={t.orientation.startHere}
+            >
+              {t.orientation.startHere}
+            </button>
+          )}
         </div>
 
         <div className="flex items-center gap-2 relative">
@@ -217,6 +239,35 @@ export const TreeView: React.FC<TreeViewProps> = ({ asciiText, rootNodeName, roo
           )}
         </div>
       </div>
+
+      {/* Start here panel */}
+      {showOrientation && orientation && (
+        <div
+          className="px-6 py-3 text-xs font-mono"
+          style={{
+            background: 'var(--al-surface-sunken)',
+            borderBottom: '1px solid var(--al-border)',
+            color: 'var(--al-text-secondary)',
+          }}
+        >
+          {orientation.entryCandidates.length > 0 && (
+            <div className="mb-1">
+              <span style={{ color: 'var(--al-accent)' }}>{t.orientation.entryPoints}</span>
+              {orientation.entryCandidates.map((p) => (
+                <div key={p} className="ml-2">→ {p}</div>
+              ))}
+            </div>
+          )}
+          {orientation.largestDirs.length > 0 && (
+            <div className="mb-1">
+              <span style={{ color: 'var(--al-accent)' }}>{t.orientation.largestDirs}</span>
+              {orientation.largestDirs.map((d) => (
+                <div key={d.path} className="ml-2">{d.path} ({d.fileCount} files)</div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 預覽區 */}
       <div

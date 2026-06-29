@@ -33,6 +33,13 @@ export interface Locale {
   asciiPreviewPlaceholder: string
   typewriterCaption: string
   langSwitcherAria: string
+  orientation: {
+    startHere: string
+    entryPoints: string
+    largestDirs: string
+    deepest: string
+    headerNote: string
+  }
 }
 
 const en: Locale = {
@@ -70,6 +77,13 @@ const en: Locale = {
   asciiPreviewPlaceholder: 'Parse the left panel to see the ASCII structure here...',
   typewriterCaption: 'Export looks like this',
   langSwitcherAria: 'Switch language',
+  orientation: {
+    startHere: 'Start here',
+    entryPoints: 'Entry points (likely start here)',
+    largestDirs: 'Largest directories',
+    deepest: 'Deepest paths',
+    headerNote: 'ArchLens — Orientation',
+  },
 }
 
 export default en

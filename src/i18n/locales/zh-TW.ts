@@ -35,6 +35,13 @@ const zhTW: Locale = {
   asciiPreviewPlaceholder: '等待左側解析完成後，此處將即時渲染 ASCII 結構圖...',
   typewriterCaption: '匯出即是這個樣子',
   langSwitcherAria: '切換語言',
+  orientation: {
+    startHere: '從這裡開始',
+    entryPoints: '入口點（建議從此開始）',
+    largestDirs: '最大目錄',
+    deepest: '最深路徑',
+    headerNote: 'ArchLens — 定向',
+  },
 }
 
 export default zhTW
